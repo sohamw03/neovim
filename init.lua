@@ -1,2 +1,0 @@
-require("soham")
-print("hello")
