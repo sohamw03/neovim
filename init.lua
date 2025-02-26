@@ -159,6 +159,8 @@ vim.opt.wildignore:append { '*/.git/*' }
 vim.cmd 'set expandtab'
 vim.cmd 'set tabstop=4'
 vim.cmd 'set shiftwidth=4'
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
 -- Set the python3 host prog to the virtualenv python if it exists
 if vim.env.VIRTUAL_ENV then
