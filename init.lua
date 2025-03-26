@@ -159,12 +159,15 @@ vim.opt.wildignore:append { '*/.git/*' }
 vim.cmd 'set expandtab'
 vim.cmd 'set tabstop=4'
 vim.cmd 'set shiftwidth=4'
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
+vim.keymap.set('n', '<A-h>', ':BufferLineCyclePrev<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-l>', ':BufferLineCycleNext<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-w>', ':bp|sp|bn|bd! <CR>', { noremap = true, silent = true })
 
 -- Set the python3 host prog to the virtualenv python if it exists
 if vim.env.VIRTUAL_ENV then
-  vim.g.python3_host_prog = vim.fn.trim(vim.fn.system('which python'))
+  vim.g.python3_host_prog = vim.fn.trim(vim.fn.system 'which python')
 else
   vim.g.python3_host_prog = 'C:/Users/soham/.pyenv/pyenv-win/shims/python.bat'
 end
@@ -565,15 +568,16 @@ require('lazy').setup({
           settings = {
             pyright = {
               autoImportCompletion = true,
-            },python = {
+            },
+            python = {
               analysis = {
                 autoSearchPaths = true,
                 diagnosticMode = 'openFilesOnly',
                 useLibraryCodeForTypes = true,
-                typeCheckingMode = 'off'
-              }
-            }
-          }
+                typeCheckingMode = 'off',
+              },
+            },
+          },
         },
 
         -- rust_analyzer = {},
@@ -625,7 +629,16 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format lua code
+        'stylua',
+        'black',
+        'gopls',
+        'isort',
+        'lua-language-server',
+        'powershell-editor-services',
+        'prettier',
+        'pyright',
+        'stylua',
+        'typescript-language-server',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -644,25 +657,55 @@ require('lazy').setup({
     end,
   },
 
-  -- { -- Autoformat
-  --   'stevearc/conform.nvim',
-  --   opts = {
-  --     notify_on_error = false,
-  --     format_on_save = {
-  --       timeout_ms = 500,
-  --       lsp_fallback = true,
-  --     },
-  --     formatters_by_ft = {
-  --       lua = { 'stylua' },
-  --       -- Conform can also run multiple formatters sequentially
-  --       python = { 'isort', 'black' },
-  --       --
-  --       -- You can use a sub-list to tell conform to run *until* a formatter
-  --       -- is found.
-  --       javascript = { { 'prettierd', 'prettier' } },
-  --     },
-  --   },
-  -- },
+  {
+    'stevearc/conform.nvim',
+    event = { 'BufWritePre' },
+    keys = {
+      {
+        -- Customize or remove this keymap to your liking
+        '<leader>f',
+        function()
+          require('conform').format { async = true }
+        end,
+        mode = 'n',
+        desc = '[F]ormat buffer',
+      },
+    },
+    opts = {
+      formatters_by_ft = {
+        lua = { 'stylua' },
+        -- Conform can also run multiple formatters sequentially
+        python = { 'isort', 'black' },
+        --
+        -- You can use a sub-list to tell conform to run *until* a formatter
+        -- is found.
+        javascript = { 'prettier' },
+      },
+      formatters = {
+        isort = {
+          include_trailing_comma = true,
+          command = 'isort',
+          args = {
+            '--line-length',
+            '120',
+            '--lines-after-import',
+            '2',
+            '--quiet',
+            '-',
+          },
+        },
+        black = {
+          command = 'black',
+          args = {
+            '--line-length',
+            '120',
+            '--quiet',
+            '-',
+          },
+        },
+      },
+    },
+  },
 
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -824,7 +867,7 @@ require('lazy').setup({
 
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup {
-        ensure_installed = { 'python', 'bash', 'html', 'lua', 'markdown', 'javascript', 'typescript' },
+        ensure_installed = { 'python', 'bash', 'html', 'lua', 'markdown', 'javascript', 'typescript', 'go' },
         -- Autoinstall languages that are not installed
         auto_install = true,
         highlight = { enable = true, additional_vim_regex_highlighting = false },
@@ -857,7 +900,7 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   -- Nvimtree (File Explorer)
   -- Added this reference to the initial file
   {
@@ -868,27 +911,62 @@ require('lazy').setup({
     },
   },
 
+  {
+    'ThePrimeagen/vim-with-me',
+    lazy = false,
+    cmd = 'VimBeGood',
+  },
+
+  {
+    'akinsho/bufferline.nvim',
+    version = '*',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      require('bufferline').setup {
+        options = {
+          numbers = 'none', -- Disable line numbers
+          close_command = 'bdelete! %d', -- Command to close buffer
+          left_trunc_marker = '<', -- Marker for truncated buffers
+          right_trunc_marker = '>', -- Marker for truncated buffers
+          buffer_close_icon = '', -- Icon to close buffer
+          modified_icon = '●', -- Icon for modified buffers
+          close_icon = '', -- Icon to close buffer
+          left_icon = '', -- Left icon
+          right_icon = '', -- Right icon
+          tab_size = 15, -- Width of each tab
+          diagnostics = false, -- Disable diagnostics
+          separator_style = 'thin', -- Style of separators
+          offsets = { { filetype = 'NvimTree', text = 'Project', text_align = 'center' } }, -- Offset for NvimTree
+        },
+      }
+    end,
+  },
+  {
+    'goerz/jupytext.nvim',
+    version = '0.2.0',
+    opts = {}, -- see Options
+  },
 }, {
-    ui = {
-      -- If you have a Nerd Font, set icons to an empty table which will use the
-      -- default lazy.nvim defined Nerd Font icons otherwise define a unicode icons table
-      icons = vim.g.have_nerd_font and {} or {
-        cmd = '⌘',
-        config = '🛠',
-        event = '📅',
-        ft = '📂',
-        init = '⚙',
-        keys = '🗝',
-        plugin = '🔌',
-        runtime = '💻',
-        require = '🌙',
-        source = '📄',
-        start = '🚀',
-        task = '📌',
-        lazy = '💤 ',
-      },
+  ui = {
+    -- If you have a Nerd Font, set icons to an empty table which will use the
+    -- default lazy.nvim defined Nerd Font icons otherwise define a unicode icons table
+    icons = vim.g.have_nerd_font and {} or {
+      cmd = '⌘',
+      config = '🛠',
+      event = '📅',
+      ft = '📂',
+      init = '⚙',
+      keys = '🗝',
+      plugin = '🔌',
+      runtime = '💻',
+      require = '🌙',
+      source = '📄',
+      start = '🚀',
+      task = '📌',
+      lazy = '💤 ',
     },
-  })
+  },
+})
 
 require('luasnip').filetype_extend('javascript', { 'javascriptreact' })
 
@@ -896,8 +974,8 @@ require('luasnip').filetype_extend('javascript', { 'html' })
 
 -- Nvimtree (File Explorer)
 -- Added this reference to the initial file
-require('nvim-tree-config')
-vim.keymap.set("n", "<leader>x", ":NvimTreeToggle<CR>", { silent = true })
+require 'nvim-tree-config'
+vim.keymap.set('n', '<leader>x', ':NvimTreeToggle<CR>', { silent = true })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
