@@ -629,14 +629,12 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
+        'ruff',
         'stylua',
-        'black',
         'gopls',
-        'isort',
         'lua-language-server',
         'powershell-editor-services',
         'prettier',
-        'pyright',
         'stylua',
         'typescript-language-server',
       })
@@ -675,30 +673,30 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        python = { 'isort', 'black' },
+        python = { 'ruff_format', 'ruff_organize_imports' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         javascript = { 'prettier' },
       },
       formatters = {
-        isort = {
-          include_trailing_comma = true,
-          command = 'isort',
+        ruff_format = {
+          command = 'ruff',
           args = {
+            'format',
             '--line-length',
-            '120',
-            '--lines-after-import',
-            '2',
+            '140',
             '--quiet',
             '-',
           },
         },
-        black = {
-          command = 'black',
+        ruff_organize_imports = {
+          command = 'ruff',
           args = {
-            '--line-length',
-            '120',
+            'check',
+            '--select',
+            'I',
+            '--fix',
             '--quiet',
             '-',
           },
