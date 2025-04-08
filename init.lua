@@ -164,6 +164,10 @@ vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
 vim.keymap.set('n', '<A-h>', ':BufferLineCyclePrev<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-l>', ':BufferLineCycleNext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-w>', ':bp|sp|bn|bd! <CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-1>', ':BufferLineGoToBuffer 1<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-2>', ':BufferLineGoToBuffer 2<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-3>', ':BufferLineGoToBuffer 3<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-4>', ':BufferLineGoToBuffer 4<CR>', { noremap = true, silent = true })
 
 -- Set the python3 host prog to the virtualenv python if it exists
 if vim.env.VIRTUAL_ENV then
@@ -312,6 +316,7 @@ require('lazy').setup({
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+        -- ['<leader>u'] = { name = '[U]ndoTree', "<cmd>lua require('lua/custom/plugins/undotree').toggle()<CR>", "Undo-Tree" },
       }
     end,
   },
@@ -685,7 +690,7 @@ require('lazy').setup({
           args = {
             'format',
             '--line-length',
-            '140',
+            '150',
             '--quiet',
             '-',
           },
@@ -934,11 +939,13 @@ require('lazy').setup({
           tab_size = 15, -- Width of each tab
           diagnostics = false, -- Disable diagnostics
           separator_style = 'thin', -- Style of separators
-          offsets = { { filetype = 'NvimTree', text = 'Project', text_align = 'center' } }, -- Offset for NvimTree
+          offsets = { { filetype = 'NvimTree', text = 'Project', text_align = 'center' }, { filetype = 'oil', text = 'Project', text_align = 'center' } }, -- Offsets for NvimTree and Oil
         },
       }
     end,
   },
+
+  -- Jupytext
   {
     'goerz/jupytext.nvim',
     version = '0.2.0',
@@ -974,6 +981,29 @@ require('lazy').setup({
     -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
     lazy = false,
   },
+
+  {
+    'nvim-treesitter/nvim-treesitter-context',
+    after = 'nvim-treesitter',
+    config = function()
+      require('treesitter-context').setup {
+        enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+        multiwindow = false, -- Enable multiwindow support.
+        max_lines = 3, -- How many lines the window should span. Values <= 0 mean no limit.
+        min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+        line_numbers = true,
+        multiline_threshold = 20, -- Maximum number of lines to show for a single context
+        trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+        mode = 'cursor', -- Line used to calculate context. Choices: 'cursor', 'topline'
+        -- Separator between context and content. Should be a single character string, like '-'.
+        -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+        separator = nil,
+        zindex = 20, -- The Z-index of the context window
+        on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+      }
+    end,
+  },
+
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the

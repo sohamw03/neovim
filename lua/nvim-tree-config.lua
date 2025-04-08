@@ -23,11 +23,6 @@ require('nvim-tree').setup {
     enable = true,
     update_cwd = true,
   },
-  actions = {
-    open_file = {
-      system_open = true,
-    },
-  },
   renderer = {
     root_folder_modifier = ':t',
     -- These icons are visible when you install web-devicons
