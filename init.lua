@@ -316,7 +316,6 @@ require('lazy').setup({
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        -- ['<leader>u'] = { name = '[U]ndoTree', "<cmd>lua require('lua/custom/plugins/undotree').toggle()<CR>", "Undo-Tree" },
       }
     end,
   },
@@ -677,6 +676,7 @@ require('lazy').setup({
     opts = {
       formatters_by_ft = {
         lua = { 'stylua' },
+        go = { 'gofumpt' },
         -- Conform can also run multiple formatters sequentially
         python = { 'ruff_format', 'ruff_organize_imports' },
         --
@@ -966,6 +966,7 @@ require('lazy').setup({
           ['<C-l>'] = false,
           ['<C-j>'] = false,
           ['<C-k>'] = false,
+          ['<C-p>'] = false,
         },
         view_options = {
           show_hidden = true,
@@ -1003,7 +1004,6 @@ require('lazy').setup({
       }
     end,
   },
-
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the
