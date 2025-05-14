@@ -163,11 +163,14 @@ vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
 vim.keymap.set('n', '<A-h>', ':BufferLineCyclePrev<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-l>', ':BufferLineCycleNext<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-H>', ':BufferLineMovePrev<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-L>', ':BufferLineMoveNext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-w>', ':bp|sp|bn|bd! <CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-1>', ':BufferLineGoToBuffer 1<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-2>', ':BufferLineGoToBuffer 2<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-3>', ':BufferLineGoToBuffer 3<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-4>', ':BufferLineGoToBuffer 4<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-5>', ':BufferLineGoToBuffer 5<CR>', { noremap = true, silent = true })
 
 -- Set the python3 host prog to the virtualenv python if it exists
 if vim.env.VIRTUAL_ENV then
