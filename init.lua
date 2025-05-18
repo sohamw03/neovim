@@ -575,16 +575,28 @@ require('lazy').setup({
           settings = {
             pyright = {
               autoImportCompletion = true,
+              disableOrganizeImports = true,
             },
             python = {
               analysis = {
-                autoSearchPaths = true,
-                diagnosticMode = 'openFilesOnly',
-                useLibraryCodeForTypes = true,
-                typeCheckingMode = 'off',
+                ignore = { '*' },
+                -- autoSearchPaths = true,
+                -- diagnosticMode = 'openFilesOnly',
+                -- useLibraryCodeForTypes = true,
+                -- typeCheckingMode = 'on',
               },
             },
           },
+        },
+
+        ruff = {
+          capabilities = {
+            -- Disable the default hover provider for ruff
+            hoverProvider = false,
+          },
+          -- init_options = {
+          --   settings = {},
+          -- },
         },
 
         -- rust_analyzer = {},
@@ -658,6 +670,8 @@ require('lazy').setup({
             require('lspconfig')[server_name].setup(server)
           end,
         },
+        ensure_installed = ensure_installed,
+        automatic_installation = false,
       }
     end,
   },
