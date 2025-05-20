@@ -313,12 +313,12 @@ require('lazy').setup({
       require('which-key').setup()
 
       -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+      require('which-key').add {
+        { '<leader>c', group = '[C]ode' },
+        { '<leader>d', group = '[D]ocument' },
+        { '<leader>r', group = '[R]ename' },
+        { '<leader>s', group = '[S]earch' },
+        { '<leader>w', group = '[W]orkspace' },
       }
     end,
   },
@@ -653,9 +653,7 @@ require('lazy').setup({
         'gopls',
         'lua-language-server',
         'powershell-editor-services',
-        'prettier',
-        'stylua',
-        'typescript-language-server',
+        'ts_ls',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -670,7 +668,7 @@ require('lazy').setup({
             require('lspconfig')[server_name].setup(server)
           end,
         },
-        ensure_installed = ensure_installed,
+        ensure_installed = table.insert(ensure_installed, "prettier"),
         automatic_installation = false,
       }
     end,
