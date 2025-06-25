@@ -254,7 +254,7 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   -- Soham's added plugins
-  { 'github/copilot.vim' },
+  -- { 'github/copilot.vim' },
   {
     'pmizio/typescript-tools.nvim',
     dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
@@ -315,7 +315,7 @@ require('lazy').setup({
       -- Document existing key chains
       require('which-key').add {
         { '<leader>c', group = '[C]ode' },
-        { '<leader>d', group = '[D]ocument' },
+        { '<leader>d', group = '[D]ebugger' },
         { '<leader>r', group = '[R]ename' },
         { '<leader>s', group = '[S]earch' },
         { '<leader>w', group = '[W]orkspace' },
@@ -402,7 +402,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
+      vim.keymap.set('n', '<leader>st', builtin.builtin, { desc = '[S]earch Select [T]elescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
@@ -510,7 +510,7 @@ require('lazy').setup({
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+          map('<leader>ss', require('telescope.builtin').lsp_document_symbols, '[S]earch [S]ymbols')
 
           -- Fuzzy find all the symbols in your current workspace
           --  Similar to document symbols, except searches over your whole project.
@@ -654,6 +654,7 @@ require('lazy').setup({
         'lua-language-server',
         'powershell-editor-services',
         'ts_ls',
+        'debugpy',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -668,7 +669,7 @@ require('lazy').setup({
             require('lspconfig')[server_name].setup(server)
           end,
         },
-        ensure_installed = table.insert(ensure_installed, "prettier"),
+        ensure_installed = table.insert(ensure_installed, 'prettier'),
         automatic_installation = false,
       }
     end,
@@ -698,6 +699,7 @@ require('lazy').setup({
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         javascript = { 'prettier' },
+        html = { 'prettier', 'js-beautify' },
       },
       formatters = {
         ruff_format = {
@@ -719,6 +721,14 @@ require('lazy').setup({
             '--fix',
             '--quiet',
             '-',
+          },
+        },
+        html = {
+          ['js-beautify'] = {
+            -- Options for js-beautify, if used
+          },
+          ['prettierd'] = {
+            -- Options for prettierd, if used
           },
         },
       },
@@ -872,6 +882,32 @@ require('lazy').setup({
         return '%2l:%-2v'
       end
 
+      -- Enable and configure mini.map
+      require('mini.map').setup {
+        -- Example: make it look like a thin scrollbar
+        window = {
+          width = 1, -- Set minimap width to 2 columns
+          side = 'right', -- Stick to the right side
+          winblend = 25, -- Transparency
+          zindex = 10, -- Z-index
+        },
+        symbols = {
+          scroll_line = '█',
+          scroll_view = '┃',
+        },
+        integrations = {
+          require('mini.map').gen_integration.diagnostic {
+            error = 'DiagnosticFloatingError',
+            warn = 'DiagnosticFloatingWarn',
+            info = 'DiagnosticFloatingInfo',
+            hint = 'DiagnosticFloatingHint',
+          },
+        },
+      }
+      require('mini.map').open()
+      vim.keymap.set('n', '<leader>mm', function()
+        require('mini.map').toggle()
+      end, { desc = 'Toggle minimap' })
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
@@ -1019,6 +1055,65 @@ require('lazy').setup({
       }
     end,
   },
+
+  {
+    'mfussenegger/nvim-dap',
+    dependencies = {
+      'rcarriga/nvim-dap-ui',
+      'theHamsta/nvim-dap-virtual-text',
+      'nvim-neotest/nvim-nio',
+      'williamboman/mason.nvim',
+    },
+    config = function()
+      dap = require 'dap'
+      ui = require 'dapui'
+
+      vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = 'Toggle Breakpoint' })
+      vim.keymap.set('n', 'gb', dap.run_to_cursor, { desc = 'Run to Cursor' })
+      vim.keymap.set('n', '<leader>dB', dap.clear_breakpoints, { desc = 'Clear all breakpoints' })
+      vim.keymap.set('n', '<leader>dT', dap.terminate, { desc = 'Terminate' })
+      vim.keymap.set('n', '<F6>', dap.pause)
+      vim.keymap.set('n', '<F5>', dap.continue)
+      vim.keymap.set('n', '<F10>', dap.step_over)
+      vim.keymap.set('n', '<F11>', dap.step_into)
+      vim.keymap.set('n', '<F12>', dap.step_out)
+
+      -- Eval var under cursor
+      vim.keymap.set('n', '<leader>?', function()
+        ui.eval(nil, { enter = true })
+      end, { desc = 'Eval Under Cursor' })
+
+      dap.listeners.before.attach.dapui_config = function()
+        ui.open()
+      end
+      dap.listeners.before.launch.dapui_config = function()
+        ui.open()
+      end
+      dap.listeners.before.event_terminated.dapui_config = function()
+        ui.close()
+      end
+      dap.listeners.before.event_exited.dapui_config = function()
+        ui.close()
+      end
+      require('dapui').setup()
+      require('nvim-dap-virtual-text').setup()
+    end,
+  },
+
+  {
+    'mfussenegger/nvim-dap-python',
+    ft = 'python',
+    config = function()
+      local python = vim.fn.stdpath 'data' .. '/mason/packages/debugpy/venv/Scripts/python'
+      require('dap-python').setup(python)
+    end,
+    dependencies = { 'mfussenegger/nvim-dap' },
+  },
+
+  {
+    'rcarriga/nvim-dap-ui',
+    dependencies = { 'mfussenegger/nvim-dap' },
+  },
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the
@@ -1049,6 +1144,9 @@ require('luasnip').filetype_extend('javascript', { 'html' })
 -- Added this reference to the initial file
 require 'nvim-tree-config'
 vim.keymap.set('n', '<leader>x', ':NvimTreeToggle<CR>', { silent = true })
+
+-- NvimDap (Debugger)
+require 'nvim-dap-config'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

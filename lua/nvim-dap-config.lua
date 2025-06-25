@@ -1,0 +1,38 @@
+-- local dap = require 'dap'
+-- dap.adapters.python = {
+--   type = 'executable',
+--   command = vim.fn.stdpath 'data' .. '/mason/packages/debugpy/venv/Scripts/python', -- Adjust for Windows if needed
+--   args = { '-m', 'debugpy.adapter' },
+-- }
+-- dap.configurations.python = {
+--   {
+--     type = 'python',
+--     request = 'launch',
+--     name = 'Launch file',
+--     program = '${file}',
+--     pythonPath = function()
+--       return 'python'
+--     end,
+--   },
+--   {
+--     type = 'python',
+--     request = 'launch',
+--     name = 'Launch with uv run',
+--     program = 'uv',
+--     args = { 'run', '${file}' },
+--     pythonPath = function()
+--       return 'python'
+--     end,
+--   },
+--   {
+--     type = 'python',
+--     request = 'launch',
+--     name = 'Debug FastAPI (uv run uvicorn)',
+--     program = 'uv',
+--     args = { 'run', 'uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '8000' },
+--     justMyCode = false, -- Set to false if you want to step into dependencies
+--     pythonPath = function()
+--       return 'python' -- Or your venv/python path
+--     end,
+--   },
+-- }
