@@ -1104,7 +1104,12 @@ require('lazy').setup({
     'mfussenegger/nvim-dap-python',
     ft = 'python',
     config = function()
-      local python = vim.fn.stdpath 'data' .. '/mason/packages/debugpy/venv/Scripts/python'
+      local python
+      if vim.loop.os_uname().sysname == 'Windows_NT' then
+        python = vim.fn.stdpath 'data' .. '/mason/packages/debugpy/venv/Scripts/python.exe'
+      else
+        python = vim.fn.stdpath 'data' .. '/mason/packages/debugpy/venv/bin/python'
+      end
       require('dap-python').setup(python)
     end,
     dependencies = { 'mfussenegger/nvim-dap' },
