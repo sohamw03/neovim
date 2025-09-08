@@ -154,14 +154,13 @@ vim.opt.scrolloff = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 --  Custom settings from Soham
-vim.opt.wildignore:append { '*/node_modules/*' }
-vim.opt.wildignore:append { '*/.git/*' }
+vim.opt.wildignore:append { '*/node_modules/*', '*/.git/*', '*/__pycache__/*', '*/.venv/*' } -- Ignore while Autocompletion
 vim.cmd 'set expandtab'
 vim.cmd 'set tabstop=4'
 vim.cmd 'set shiftwidth=4'
-vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv") -- Dragging lines
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
-vim.keymap.set('n', '<A-h>', ':BufferLineCyclePrev<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-h>', ':BufferLineCyclePrev<CR>', { noremap = true, silent = true }) -- Tabs keymaps
 vim.keymap.set('n', '<A-l>', ':BufferLineCycleNext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-H>', ':BufferLineMovePrev<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<A-L>', ':BufferLineMoveNext<CR>', { noremap = true, silent = true })
@@ -590,16 +589,6 @@ require('lazy').setup({
           },
         },
 
-        ruff = {
-          capabilities = {
-            -- Disable the default hover provider for ruff
-            hoverProvider = false,
-          },
-          -- init_options = {
-          --   settings = {},
-          -- },
-        },
-
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -649,7 +638,7 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'ruff',
+        'pyright',
         'stylua',
         'gopls',
         'lua-language-server',
@@ -701,6 +690,7 @@ require('lazy').setup({
         -- is found.
         javascript = { 'prettier' },
         html = { 'prettier', 'js-beautify' },
+        json = { 'prettier' },
       },
       formatters = {
         ruff_format = {
@@ -708,7 +698,7 @@ require('lazy').setup({
           args = {
             'format',
             '--line-length',
-            '150',
+            '80',
             '--quiet',
             '-',
           },
@@ -884,7 +874,6 @@ require('lazy').setup({
       vim.cmd.hi 'Comment gui=none'
     end,
   },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -1045,6 +1034,66 @@ require('lazy').setup({
     }, -- see Options
   },
 
+  {
+    'akinsho/toggleterm.nvim',
+    version = '*',
+    config = function()
+      require('toggleterm').setup {
+        -- You can add any general toggleterm setup options here.
+      }
+
+      -- Custom runner setup
+      local Terminal = require('toggleterm.terminal').Terminal
+      local cmd_to_run = nil
+
+      local runner_term = Terminal:new {
+        cmd = 'pwsh.exe -nol',
+        hidden = true,
+        direction = 'float',
+        float_opts = {
+          border = 'curved',
+        },
+        on_open = function(term)
+          if cmd_to_run then
+            vim.fn.chansend(term.job_id, cmd_to_run .. '\r')
+            cmd_to_run = nil
+          end
+          vim.cmd 'startinsert!'
+        end,
+        close_on_exit = false,
+      }
+
+      function _G.run_current_file()
+        local file = vim.fn.expand '%'
+        if not file or file == '' then
+          vim.notify('No file to run.', { level = vim.log.levels.WARN, title = 'Runner' })
+          return
+        end
+
+        local runner = vim.fn.executable 'uv' == 1 and 'uv run' or 'python'
+        cmd_to_run = runner .. ' ' .. vim.fn.shellescape(file)
+        runner_term:toggle()
+      end
+
+      vim.keymap.set('n', '<leader>R', '<cmd>lua _G.run_current_file()<CR>', {
+        noremap = true,
+        silent = true,
+        desc = 'Run current file in a floating terminal',
+      })
+
+      function _G.toggle_float_term()
+        cmd_to_run = nil
+        runner_term:toggle()
+      end
+
+      vim.keymap.set('n', '<leader>t', '<cmd>lua _G.toggle_float_term()<CR>', {
+        noremap = true,
+        silent = true,
+        desc = 'Toggle floating terminal',
+      })
+    end,
+  },
+
   -- Oil.nvim
   {
     'stevearc/oil.nvim',
@@ -1116,8 +1165,8 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>dT', dap.terminate, { desc = 'Terminate' })
       vim.keymap.set('n', '<F6>', dap.pause)
       vim.keymap.set('n', '<F5>', dap.continue)
+      vim.keymap.set('n', '<F8>', dap.step_into)
       vim.keymap.set('n', '<F10>', dap.step_over)
-      vim.keymap.set('n', '<F11>', dap.step_into)
       vim.keymap.set('n', '<F12>', dap.step_out)
 
       -- Eval var under cursor
@@ -1161,6 +1210,45 @@ require('lazy').setup({
     'rcarriga/nvim-dap-ui',
     dependencies = { 'mfussenegger/nvim-dap' },
   },
+
+  {
+    'windwp/nvim-autopairs',
+    config = function()
+      require('nvim-autopairs').setup()
+    end,
+  },
+
+  {
+    'folke/zen-mode.nvim',
+    config = function()
+      vim.keymap.set('n', '<leader>zz', function()
+        require('zen-mode').setup {
+          window = {
+            width = 90,
+            options = {},
+          },
+        }
+        require('zen-mode').toggle()
+        vim.wo.wrap = false
+        vim.wo.number = true
+        vim.wo.rnu = true
+      end)
+
+      vim.keymap.set('n', '<leader>zZ', function()
+        require('zen-mode').setup {
+          window = {
+            width = 80,
+            options = {},
+          },
+        }
+        require('zen-mode').toggle()
+        vim.wo.wrap = false
+        vim.wo.number = false
+        vim.wo.rnu = false
+        vim.opt.colorcolumn = '0'
+      end)
+    end,
+  },
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the
@@ -1200,3 +1288,31 @@ require('luasnip.loaders.from_vscode').lazy_load()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- Neovide Conditional Config
+if vim.g.neovide then
+  vim.o.guifont = 'Hack Nerd Font Mono:h14' -- text below applies for VimScript
+  vim.g.neovide_scale_factor = 1.0
+
+  -- Create a function to change the scale factor
+  local change_scale_factor = function(delta)
+    vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta
+  end
+
+  -- Custom keymaps for zooming
+  vim.keymap.set('n', '<C-=>', function()
+    change_scale_factor(1.25)
+  end, { noremap = true, silent = true })
+  vim.keymap.set('n', '<C-->', function()
+    change_scale_factor(1 / 1.25)
+  end, { noremap = true, silent = true })
+
+  vim.g.neovide_title_background_color = string.format('%x', vim.api.nvim_get_hl(0, { id = vim.api.nvim_get_hl_id_by_name 'Normal' }).bg)
+  vim.g.neovide_hide_mouse_when_typing = true
+
+  vim.keymap.set('n', '<F11>', function()
+    vim.g.neovide_fullscreen = not vim.g.neovide_fullscreen
+  end, { silent = true })
+
+  vim.g.neovide_cursor_animation_length = 0
+end
