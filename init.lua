@@ -588,6 +588,7 @@ require('lazy').setup({
             },
           },
         },
+        taplo = {},
 
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -645,6 +646,8 @@ require('lazy').setup({
         'powershell-editor-services',
         'ts_ls',
         'debugpy',
+        'taplo',
+        'typescript-language-server',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -689,8 +692,9 @@ require('lazy').setup({
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         javascript = { 'prettier' },
-        html = { 'prettier', 'js-beautify' },
+        html = { 'prettier' },
         json = { 'prettier' },
+        toml = { 'taplo' },
       },
       formatters = {
         ruff_format = {
