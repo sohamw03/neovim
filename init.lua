@@ -1276,6 +1276,13 @@ require('lazy').setup({
       end)
     end,
   },
+
+  {
+    'tpope/vim-fugitive',
+    config = function()
+      vim.keymap.set('n', 'gGd', ':Gvdiffsplit<CR>', { noremap = true, silent = true })
+    end,
+  },
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the
