@@ -115,6 +115,31 @@ vim.opt.showmode = false
 --  See `:help 'clipboard'`
 vim.opt.clipboard = 'unnamedplus'
 
+local function is_wsl()
+  local f = io.open '/proc/version'
+  if f then
+    local content = f:read '*a'
+    f:close()
+    return string.find(content:lower(), 'microsoft') ~= nil
+  end
+  return false
+end
+
+if is_wsl() then
+  vim.g.clipboard = {
+    name = 'win32yank-wsl',
+    copy = {
+      ['+'] = 'win32yank -i --crlf',
+      ['*'] = 'win32yank -i --crlf',
+    },
+    paste = {
+      ['+'] = 'win32yank -o --lf',
+      ['*'] = 'win32yank -o --lf',
+    },
+    cache_enabled = 0,
+  }
+end
+
 -- Enable break indent
 vim.opt.breakindent = true
 
@@ -174,8 +199,6 @@ vim.keymap.set('n', '<A-5>', ':BufferLineGoToBuffer 5<CR>', { noremap = true, si
 -- Set the python3 host prog to the virtualenv python if it exists
 if vim.env.VIRTUAL_ENV then
   vim.g.python3_host_prog = vim.fn.trim(vim.fn.system 'which python')
-else
-  vim.g.python3_host_prog = 'C:/Users/soham/.pyenv/pyenv-win/shims/python.bat'
 end
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
