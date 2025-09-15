@@ -180,9 +180,10 @@ vim.opt.scrolloff = 10
 --  See `:help vim.keymap.set()`
 --  Custom settings from Soham
 vim.opt.wildignore:append { '*/node_modules/*', '*/.git/*', '*/__pycache__/*', '*/.venv/*' } -- Ignore while Autocompletion
-vim.cmd 'set expandtab'
-vim.cmd 'set tabstop=4'
-vim.cmd 'set shiftwidth=4'
+vim.opt.expandtab = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.softtabstop = 4
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv") -- Dragging lines
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
 vim.keymap.set('n', '<A-h>', ':BufferLineCyclePrev<CR>', { noremap = true, silent = true }) -- Tabs keymaps
@@ -625,6 +626,7 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
+        hyprls = {},
         pyright = {
           settings = {
             pyright = {
@@ -702,6 +704,7 @@ require('lazy').setup({
         'debugpy',
         'taplo',
         'typescript-language-server',
+        'shfmt',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -742,7 +745,7 @@ require('lazy').setup({
         go = { 'gofumpt' },
         -- Conform can also run multiple formatters sequentially
         python = { 'ruff_format', 'ruff_organize_imports' },
-        --
+        sh = { 'shfmt' },
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         javascript = { 'prettier' },
@@ -779,6 +782,9 @@ require('lazy').setup({
           ['prettierd'] = {
             -- Options for prettierd, if used
           },
+        },
+        shfmt = {
+          prepend_args = { '-i', '4', '-ci', '-bn' }, -- Example arguments for shfmt
         },
       },
     },
