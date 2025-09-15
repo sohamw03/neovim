@@ -215,6 +215,37 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagn
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- Quickfix keymaps
+vim.keymap.set('n', '<leader>[', ':copen<CR>', { silent = true, noremap = true })
+vim.keymap.set('n', '<leader>]', ':cclose<CR>', { silent = true, noremap = true })
+vim.keymap.set('n', '<leader>la', function()
+  local entry = {
+    filename = vim.fn.expand '%',
+    lnum = vim.fn.line '.',
+    col = 1,
+    text = vim.fn.getline '.',
+  }
+  vim.fn.setqflist({ entry }, 'a')
+  print 'Added current line to quickfix list'
+end, { noremap = true, silent = true })
+-- Remove current quickfix item
+vim.keymap.set('n', '<leader>lr', function()
+  local qf_list = vim.fn.getqflist()
+  local idx = vim.fn.getqflist({ idx = 0 }).idx -- current index
+  if idx > 0 and idx <= #qf_list then
+    table.remove(qf_list, idx)
+    vim.fn.setqflist(qf_list, 'r')
+    print('❌ Removed quickfix item ' .. idx)
+  end
+end, { noremap = true, silent = true })
+-- Clear quickfix list
+vim.keymap.set('n', '<leader>lc', function()
+  vim.fn.setqflist {}
+  print '🧹 Quickfix list cleared'
+end, { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>lg', ':grep<space>', { noremap = true, silent = false }) -- prompt for grep query and fill quickfix
+vim.keymap.set('n', '<leader>lv', ':vimgrep /pattern/ **/*<CR>:copen<CR>', { noremap = true, silent = true }) -- example to vimgrep and open quickfix
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
